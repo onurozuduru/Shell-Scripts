@@ -1,0 +1,26 @@
+#!/bin/sh
+
+api_key="YOUR GUARDIAN API KEY"
+TMP="THE NAME OF THE FILE WHERE YOU'D KEEP DOWNLOADED JSON FILES"
+
+baseURL="http://content.guardianapis.com/search?format=json&page-size=50&api_key="$api_key
+
+if [ ! -z $1 ] ; then
+  today=`date +"%F"`
+  if [ $1 = "all" ] ; then
+     query="&q=$2"
+  else
+     query="&q=$2&tag=$1"
+  fi
+  if [ -z $3 ] ; then
+     query=$query"&date-id=date%2Flast30days"
+  else
+     query=$query"&from-date=$3&to-date="$today
+  fi
+  if [ $1 != "rep" ] ; then
+     curl $baseURL$query 2> /dev/null > $TMP
+  fi
+  egrep -e 'webTitle|webUrl|webPublicationDate' $TMP | sed -e 's/"[:,]/"AAAA/g; s:"::g;' | awk -FAAAA '{if(FNR%3==1) {printf("\n");} else {printf("\t");} print $2;}' 
+else
+  echo "Usage: guardian TAG SEARCH+TERMS DATE_LIMIT"
+fi
