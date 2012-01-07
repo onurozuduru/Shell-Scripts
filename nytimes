@@ -1,0 +1,23 @@
+#!/bin/sh
+
+TMP="PLACE WHERE YOU KEEP YOUR DOWNLOADED JSON FILE"
+
+baseUrl="http://api.nytimes.com/svc/search/v1/article?format=json&fields=date,title,url,body&rank=newest"
+apiKey="&api-key=YOUR NYTIMES ARTICLE SEARCH API HERE"
+
+
+if [ ! -z $2 ]; then
+   facet="&facet_terms=$2"
+fi
+if [ ! -z $1 ]; then
+   query="&query=$1"
+fi
+
+## echo $baseUrl$query$apiKey 
+
+if [ $1 != "rep" ]; then
+   curl $baseUrl$query$facet$apiKey 2> /dev/null > $TMP
+fi
+
+
+sed -e 's:\[{:\n:g; s:}\]:\n:g; s:["}]\ ,\ ["{]:"\n:g; s:\\/:/:g; s:"::g; s/\ :\ /AAAA/g;' $TMP | egrep -e '^url|^date|^title|^body' | awk -FAAAA '{ print $2; if($1=="url") {print "\n";}}'
