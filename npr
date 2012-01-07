@@ -1,0 +1,32 @@
+#!/bin/sh
+
+apiKEY="YOUR API KEY HERE"
+baseURL="http://api.npr.org/query?id="
+rest="&fields=title,teaser,listText,summary&dateType=story&output=JSON&apiKey=$apiKEY"
+
+TMP="FILENAME WHERE YOU'D LIKE TO KEEP THE DOWNLOADED JSON FILE"
+
+if [ -z $1 ] ; then
+   echo "Usage: npr TAG\n\tThe following tags are available: US, World, Tech, Economy, Culture, Politics, News"
+   exit;
+fi
+
+## IMPORTANT: The ID's must be ordered
+case $1 in
+   us|US) ID="1003,1014,1122" ;;
+   world|World|WORLD) ID="1004,1124" ;;
+   tech|technology|Technology) ID="1007,1019,1026,1049" ;;
+   econ|economy|Economy) ID="1006,1017,1018" ;;
+   politics|Politics|POLITICS) ID="1014,1057,1060" ;;
+   news|News|NEWS) ID="1001,1014,1024,1090,1150" ;;
+   *) ID="1001" ;;
+esac
+
+# you can repeat the last search without bothering to send a query
+if [ $1 != "rep" ]; then
+  curl $baseURL$ID$rest 2> /dev/null > $TMP
+fi
+
+sed -e 's/":\ /":\n/g; s:"::g;' $TMP | egrep -e 'n.pr|pubDate|subtitle|miniTeaser' | sed -e 's/},.*$//; s/}\],.*$//; s/^http/\nhttp/;'
+
+
