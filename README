@@ -4,8 +4,8 @@ If the news search scripts are used together with a URL aware terminal
 with your favorite browser.  In order for these scripts to work, you
 need to register with the corresponding webpage and get an API key.
 
-wordnik  : spell check a word using 'aspell' and get the definition of
-           a word using wordnik.com web API.
+lookup   : spell check a word using 'aspell' and get the definition of
+           a word using wordnik.com or urbandictionary.com web APIs.
 
 guardian : search for news articles on guardian.co.uk
 
