@@ -17,10 +17,10 @@ if [ -z $2 ] ; then
 fi
 
 ## Your wordnick.com user.name, password and authentication key
-user_name="atabey.kaygun"
-password="she4wnvek"
-auth="9c1d853964a829cce25060c4f6b0f162f6145c6b4b3ec1013"
-TOKENFILE=$HOME/local/lib/wordnik.auth
+user_name="YOUR WORDNIK USERNAME"
+password="YOUR WORDNIK PASSWORD"
+auth="YOUR WORDNIK API KEY"
+TOKENFILE="FILENAME WHERE YOU WANT TO KEEP YOUR WORDNIK TOKEN"
 
 ## In order to use the API, we must authenticate first
 ## then we get a token and use this token until it expires.
