@@ -1,0 +1,63 @@
+#!/bin/sh
+
+if [ -z $1 ] ; then
+   echo "Available options are" 
+   echo "wordnik WORD        : Check if a word is in the local dictionary (uses aspell)"
+   echo "wordnik WORD wordnik: Find the the definition of a word from wordnik"
+   echo "wordnik WORD urban  : Find the the definition of a word from urban dictionary"
+   exit
+fi
+
+if [ -z $2 ] ; then 
+   echo $1 | \
+   /usr/bin/aspell -a -c list 2> /dev/null | \
+   awk -F: '{ print $2;}' | \
+   sed -e 's/,/\n/g; /^$/d;'
+   exit
+fi
+
+## Your wordnick.com user.name, password and authentication key
+user_name="atabey.kaygun"
+password="she4wnvek"
+auth="9c1d853964a829cce25060c4f6b0f162f6145c6b4b3ec1013"
+TOKENFILE=$HOME/local/lib/wordnik.auth
+
+## In order to use the API, we must authenticate first
+## then we get a token and use this token until it expires.
+if [ -e $TOKENFILE ] ;
+   then token=`awk '{ print $2; }' $TOKENFILE`
+   command="curl -H api_key:$auth -H token:$token http://api.wordnik.com/v4"
+else
+   command="curl -H api_key:$auth http://api.wordnik.com/v4"
+   results=`$command/account.json/apiTokenStatus 2> /dev/null | cut -c3-4`
+   if [ $results = "va" ] ; then
+      echo "your token is valid" 
+   else
+      curl -H api_key:$auth http://api.wordnik.com/v4/account.json/authenticate/$user_name?password=$password 2> /dev/null | \
+      sed -e 's/[{}]//g; s/[,:]//g; s/"/\ /g;' > $TOKENFILE
+   fi 
+fi
+
+## This is where the dirty magic happens
+case $2 in
+  urban) 
+    curl http://www.urbandictionary.com/iphone/search/define?term=$1 2> /dev/null | \
+    sed -e 's/},{/\n/g; s/\",\"/\n/g;' | \
+    grep definition | awk -F\":\" '{print $2 "\n";}' | \
+    par w72
+  ;;
+  wordnik)
+    $command/word.json/$1/definitions 2> /dev/null | \
+    sed -e 's:},{:\n:g; s:[\[{\]}]::g; s/",/":/g;' | \
+    awk -F\": '{ print $4 "\n"; }' | sed -e 's/^"//g' | \
+    par w72 
+  ;;
+  *|help)
+    echo "Available options are" 
+    echo "wordnik WORD        : Check if a word is in the local dictionary (uses aspell)"
+    echo "wordnik WORD wordnik: Find the the definition of a word from wordnik"
+    echo "wordnik WORD urban  : Find the the definition of a word from urban dictionary"
+    exit
+  ;;
+esac
+
