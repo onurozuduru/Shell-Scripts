@@ -19,24 +19,25 @@ fi
 ## Your wordnick.com user.name, password and authentication key
 user_name="YOUR WORDNIK USERNAME"
 password="YOUR WORDNIK PASSWORD"
-auth="YOUR WORDNIK API KEY"
+apiKey="YOUR WORDNIK API KEY"
 TOKENFILE="FILENAME WHERE YOU WANT TO KEEP YOUR WORDNIK TOKEN"
+
+base_URL="http://api.wordnik.com/v4"
 
 ## In order to use the API, we must authenticate first
 ## then we get a token and use this token until it expires.
-if [ -e $TOKENFILE ] ;
-   then token=`awk '{ print $2; }' $TOKENFILE`
-   command="curl -H api_key:$auth -H token:$token http://api.wordnik.com/v4"
-else
-   command="curl -H api_key:$auth http://api.wordnik.com/v4"
-   results=`$command/account.json/apiTokenStatus 2> /dev/null | cut -c3-4`
+if [ ! -e $TOKENFILE ] ; then
+   curl -H api_key:$apiKey $base_URL/account.json/apiTokenStatus 2> /dev/null > ~/local/tmp/wordnik_token
+   results=`cat ~/local/tmp/wordnik_token | cut -c3-4`
    if [ $results = "va" ] ; then
       echo "your token is valid" 
-   else
-      curl -H api_key:$auth http://api.wordnik.com/v4/account.json/authenticate/$user_name?password=$password 2> /dev/null | \
-      sed -e 's/[{}]//g; s/[,:]//g; s/"/\ /g;' > $TOKENFILE
    fi 
+   curl -H api_key:$apiKey $base_URL/account.json/authenticate/$user_name?password=$password 2> /dev/null | \
+   sed -e 's/[{}]//g; s/[,:]/\ /g; s/"/\ /g;' > $TOKENFILE
 fi
+
+token=`awk '{ print $2; }' $TOKENFILE`
+command="-H api_key:$apiKey -H token:$token"
 
 ## This is where the dirty magic happens
 case $2 in
@@ -47,10 +48,8 @@ case $2 in
     par w72
   ;;
   wordnik)
-    $command/word.json/$1/definitions 2> /dev/null | \
-    sed -e 's:},{:\n:g; s:[\[{\]}]::g; s/",/":/g;' | \
-    awk -F\": '{ print $4 "\n"; }' | sed -e 's/^"//g' | \
-    par w72 
+    curl $command $base_URL/word.json/$1/definitions 2> /dev/null | \
+    sed -e 's/","/\n/g;' | grep ^text | awk -F\":\" '{print $2;}' 
   ;;
   *|help)
     echo "Available options are" 
