@@ -1,11 +1,17 @@
 #!/bin/sh
 
-if [ -z $1 ] ; then
+
+options() {
    echo "Available options are" 
    echo "wordnik WORD        : Check if a word is in the local dictionary (uses aspell)"
    echo "wordnik WORD wordnik: Find the the definition of a word from wordnik"
    echo "wordnik WORD urban  : Find the the definition of a word from urban dictionary"
    exit
+}
+
+
+if [ -z $1 ] ; then
+  options
 fi
 
 if [ -z $2 ] ; then 
@@ -52,11 +58,7 @@ case $2 in
     sed -e 's/","/\n/g;' | grep ^text | awk -F\":\" '{print $2;}' 
   ;;
   *|help)
-    echo "Available options are" 
-    echo "wordnik WORD        : Check if a word is in the local dictionary (uses aspell)"
-    echo "wordnik WORD wordnik: Find the the definition of a word from wordnik"
-    echo "wordnik WORD urban  : Find the the definition of a word from urban dictionary"
-    exit
+    options
   ;;
 esac
 
