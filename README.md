@@ -1,15 +1,11 @@
-These are some shell scripts I wrote to interact with few web API's.
-If the news search scripts are used together with a URL aware terminal 
-(such as roxterm) you can click on the URLs and are taken to the webpage 
-with your favorite browser.  In order for these scripts to work, you
-need to register with the corresponding webpage and get an API key.
+Below are some shell scripts I wrote to do various sort of things.
 
-lookup   : spell check a word using 'aspell' and get the definition of
-           a word using wordnik.com or urbandictionary.com web APIs.
+*guardian*: Search for news articles on guardian.co.uk
 
-guardian : search for news articles on guardian.co.uk
+*nytimes*: Search for news articles on nytimes.com
 
-nytimes  : search for news articles on nytimes.com
+*npr*: Search for news articles on npr.org
 
-npr      : search for news articles on npr.org
-`
+*log*: Simple micro-log program. Emphasis was on being easy to use.
+
+*todo*: A simple to-do manager.

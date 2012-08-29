@@ -1,11 +1,9 @@
 #!/bin/sh
 
-
 options() {
    echo "Available options are" 
    echo "wordnik WORD        : Check if a word is in the local dictionary (uses aspell)"
    echo "wordnik WORD wordnik: Find the the definition of a word from wordnik"
-   echo "wordnik WORD urban  : Find the the definition of a word from urban dictionary"
    exit
 }
 
@@ -22,7 +20,7 @@ if [ -z $2 ] ; then
    exit
 fi
 
-## Your wordnick.com user.name, password and authentication key
+## Your wordnik.com user.name, password and authentication key
 user_name="YOUR WORDNIK USERNAME"
 password="YOUR WORDNIK PASSWORD"
 apiKey="YOUR WORDNIK API KEY"
@@ -47,12 +45,6 @@ command="-H api_key:$apiKey -H token:$token"
 
 ## This is where the dirty magic happens
 case $2 in
-  urban) 
-    curl http://www.urbandictionary.com/iphone/search/define?term=$1 2> /dev/null | \
-    sed -e 's/},{/\n/g; s/\",\"/\n/g;' | \
-    grep definition | awk -F\":\" '{print $2 "\n";}' | \
-    par w72
-  ;;
   wordnik)
     curl $command $base_URL/word.json/$1/definitions 2> /dev/null | \
     sed -e 's/","/\n/g;' | grep ^text | awk -F\":\" '{print $2;}' 
