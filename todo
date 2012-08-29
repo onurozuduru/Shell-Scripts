@@ -1,0 +1,73 @@
+#!/bin/sh
+
+# The file where you'll keep the to-do list.
+# And if you keep this in a Dropbox directory you can
+# access it anywhere :)
+
+FILE=
+
+if [ -z $1 ]; then
+   grep -v DONE $FILE | sort -k3 
+   exit
+fi
+
+if [ $1 = '%' ]; then
+   N=`wc -l $FILE | awk '{print$1;}'`
+   vi +$N $FILE
+   exit
+fi
+
+if [ -z $2 ]; then
+   echo "You must specify a TAG"
+   exit
+fi
+
+strip() {
+ echo $@ | sed s/$1\ $2//
+}
+
+prepare() {
+ mv $FILE $FILE.old
+ A=$(strip $@)
+ grep $2 $FILE.old | grep $A | cut -c-19
+}
+
+case $1 in 
+  -) B=$(prepare $@)
+     sed "s/$B SCHD/$B DONE/g" $FILE.old > $FILE
+  ;;
+
+  u) B=$(prepare $@)
+     sed "s/$B DONE/$B SCHD/g" $FILE.old > $FILE
+  ;;
+
+  r) if [ -z $3 ]; then
+        echo Specify which item under the tag \#$2 is to be removed.
+        exit
+     fi
+     sed "/$B/d" $FILE.old > $FILE
+  ;;
+
+  +) A=$(strip $@)
+     echo `date +%Y-%m-%d\ %T` SCHD \#$2 $A >> $FILE
+  ;;
+
+ ++) A=$(strip $@)
+     echo `date +%Y-%m-%d\ %T` DONE \#$2 $A >> $FILE
+  ;;
+
+  /) grep \#$2 $FILE | sort -k3
+  ;;
+
+  *) echo Usage: 
+     echo \ + TAG ITEM: Add a to-do item with a specific tag.
+     echo  ++ TAG ITEM: Add a to-do item and declare it DONE.
+     echo \ - TAG ITEM: Declare the to-do item as DONE.
+     echo \ u TAG ITEM: Declare a DONE to-do item back to undone.
+     echo \ / TAG ITEM: Search ITEM under the TAG.
+     echo \ r TAG ITEM: Remove an ITEM under the TAG.
+     echo \ % : Edit the last item. 
+  ;;
+esac
+
+

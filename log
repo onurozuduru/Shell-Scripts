@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# The name of the log file.
+# If you keep it over in a Dropbox directory then you can
+# access it anywhere :)
+FILE=
+
+if [ -z $1 ]; then
+   tail -10 $FILE 
+   exit
+fi
+
+strip(){
+  echo $@ | sed s/$1\ //
+}
+
+case $1 in
+
+   %) N=`wc -l $FILE | awk '{print$1;}'`
+      vi +$N $FILE
+      ;;
+
+   +) A=$(strip $@)
+      if [ ! -z $2 ]; then
+         echo `date +%Y-%m-%d\ %T` $A >> $FILE
+      else
+         echo `date +%Y-%m-%d\ %T` `xsel` >> $FILE 
+      fi
+      ;;
+
+  ++) A=$(strip $@)
+      echo `date +%Y-%m-%d\ %T` $A `xsel` >> $FILE
+      ;;
+
+   -) A=`tail -1 $FILE | cut -c-29 | sed "s:\ :\\\ :g"`
+      sed "/$A/d" $FILE > $FILE.new
+      mv $FILE.new $FILE
+      ;;
+
+   /) A=`echo $@ | sed s:/\ ::`
+      grep $A $FILE 
+      ;;
+
+   *) echo Usage: 
+      echo \ + Add an item. If nothing is given the content of the clipboard is used.
+      echo ++ Add an item together with the content of the clipboard.
+      echo \ - Remove the last item.
+      echo \ % Edit the last item.
+      echo \ / Search for an item.
+      ;;
+esac
